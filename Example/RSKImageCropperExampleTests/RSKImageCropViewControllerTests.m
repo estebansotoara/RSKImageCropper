@@ -136,12 +136,14 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
 - (void)handleRotation:(UIRotationGestureRecognizer *)gestureRecognizer;
 - (void)onCancelButtonTouch:(UIBarButtonItem *)sender;
 - (void)onChooseButtonTouch:(UIBarButtonItem *)sender;
+- (void)onRotateButtonTouch:(UIBarButtonItem *)sender;
 - (void)layoutImageScrollView;
 - (void)reset:(BOOL)animated;
 - (void)resetContentOffset;
 - (void)resetFrame;
 - (void)resetRotation;
 - (void)resetZoomScale;
+- (void)rotateNinetyDegreesClockwise;
 
 @end
 
@@ -172,6 +174,10 @@ describe(@"init", ^{
     
     it(@"should init with disabled rotation", ^{
         expect(imageCropViewController.rotationEnabled).to.beFalsy();
+    });
+    
+    it(@"should init with disabled fixed rotation", ^{
+        expect(imageCropViewController.fixedRotationEnabled).to.beFalsy();
     });
     
     it(@"should init with disabled masking image", ^{
@@ -918,6 +924,19 @@ describe(@"rotation", ^{
         [mockRotationGestureRecognizer stopMocking];
     });
     
+    it(@"enables the rotation button", ^{
+        imageCropViewController = [[RSKImageCropViewController alloc] init];
+        BOOL testFixedRotationEnabled = YES;
+        
+        id mockFixedRotationButton = [OCMockObject partialMockForObject:imageCropViewController.rotateButton];
+        [[mockFixedRotationButton expect] setEnabled:testFixedRotationEnabled];
+        
+        imageCropViewController.fixedRotationEnabled = testFixedRotationEnabled;
+        
+        [mockFixedRotationButton verify];
+        [mockFixedRotationButton stopMocking];
+    });
+    
     it(@"handles the rotation", ^{
         imageCropViewController = [[RSKImageCropViewController alloc] init];
         id mockImageCropViewController = [OCMockObject partialMockForObject:imageCropViewController];
@@ -1043,6 +1062,15 @@ describe(@"taps", ^{
         [[mock expect] cropImage];
         
         [imageCropViewController onChooseButtonTouch:nil];
+        
+        [mock verify];
+    });
+    
+    it(@"handles tap on the rotate button", ^{
+        id mock = [OCMockObject partialMockForObject:imageCropViewController];
+        [[mock expect] rotateNinetyDegreesClockwise];
+        
+        [imageCropViewController onRotateButtonTouch:nil];
         
         [mock verify];
     });
