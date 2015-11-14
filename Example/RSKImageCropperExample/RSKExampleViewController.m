@@ -151,6 +151,7 @@ static const CGFloat kPhotoFrameViewPadding = 2.0f;
     UIImage *photo = [UIImage imageNamed:@"photo"];
     RSKImageCropViewController *imageCropVC = [[RSKImageCropViewController alloc] initWithImage:photo cropMode:RSKImageCropModeCircle];
     imageCropVC.delegate = self;
+    imageCropVC.fixedRotationEnabled = YES;
     [self.navigationController pushViewController:imageCropVC animated:YES];
 }
 

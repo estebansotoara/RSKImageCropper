@@ -34,12 +34,12 @@ static const CGFloat kPortraitCircleMaskRectInnerEdgeInset = 15.0f;
 static const CGFloat kPortraitSquareMaskRectInnerEdgeInset = 20.0f;
 static const CGFloat kPortraitMoveAndScaleLabelVerticalMargin = 64.0f;
 static const CGFloat kPortraitCancelAndChooseButtonsHorizontalMargin = 13.0f;
-static const CGFloat kPortraitCancelAndChooseButtonsVerticalMargin = 21.0f;
+static const CGFloat kPortraitRotateCancelAndChooseButtonsVerticalMargin = 21.0f;
 
 static const CGFloat kLandscapeCircleMaskRectInnerEdgeInset = 45.0f;
 static const CGFloat kLandscapeSquareMaskRectInnerEdgeInset = 45.0f;
 static const CGFloat kLandscapeMoveAndScaleLabelVerticalMargin = 12.0f;
-static const CGFloat kLandscapeCancelAndChooseButtonsVerticalMargin = 12.0f;
+static const CGFloat kLandscapeRotateCancelAndChooseButtonsVerticalMargin = 12.0f;
 
 static const CGFloat kResetAnimationDuration = 0.4;
 static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
@@ -71,6 +71,7 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
 @property (strong, nonatomic) UILabel *moveAndScaleLabel;
 @property (strong, nonatomic) UIButton *cancelButton;
 @property (strong, nonatomic) UIButton *chooseButton;
+@property (strong, nonatomic) UIButton *rotateButton;
 
 @property (strong, nonatomic) UITapGestureRecognizer *doubleTapGestureRecognizer;
 @property (strong, nonatomic) UIRotationGestureRecognizer *rotationGestureRecognizer;
@@ -79,6 +80,7 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
 @property (strong, nonatomic) NSLayoutConstraint *moveAndScaleLabelTopConstraint;
 @property (strong, nonatomic) NSLayoutConstraint *cancelButtonBottomConstraint;
 @property (strong, nonatomic) NSLayoutConstraint *chooseButtonBottomConstraint;
+@property (strong, nonatomic) NSLayoutConstraint *rotateButtonBottomConstraint;
 
 @end
 
@@ -94,6 +96,7 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
         _applyMaskToCroppedImage = NO;
         _maskLayerLineWidth = 1.0;
         _rotationEnabled = NO;
+        _fixedRotationEnabled = NO;
         _cropMode = RSKImageCropModeCircle;
     }
     return self;
@@ -139,7 +142,8 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
     [self.view addSubview:self.moveAndScaleLabel];
     [self.view addSubview:self.cancelButton];
     [self.view addSubview:self.chooseButton];
-    
+    [self.view addSubview:self.rotateButton];
+
     [self.view addGestureRecognizer:self.doubleTapGestureRecognizer];
     [self.view addGestureRecognizer:self.rotationGestureRecognizer];
 }
@@ -233,7 +237,7 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
                                                    constant:constant];
         [self.view addConstraint:constraint];
         
-        constant = -kPortraitCancelAndChooseButtonsVerticalMargin;
+        constant = -kPortraitRotateCancelAndChooseButtonsVerticalMargin;
         self.cancelButtonBottomConstraint = [NSLayoutConstraint constraintWithItem:self.cancelButton attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual
                                                                             toItem:self.view attribute:NSLayoutAttributeBottom multiplier:1.0f
                                                                           constant:constant];
@@ -249,22 +253,39 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
                                                    constant:constant];
         [self.view addConstraint:constraint];
         
-        constant = -kPortraitCancelAndChooseButtonsVerticalMargin;
+        constant = -kPortraitRotateCancelAndChooseButtonsVerticalMargin;
         self.chooseButtonBottomConstraint = [NSLayoutConstraint constraintWithItem:self.chooseButton attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual
                                                                             toItem:self.view attribute:NSLayoutAttributeBottom multiplier:1.0f
                                                                           constant:constant];
         [self.view addConstraint:self.chooseButtonBottomConstraint];
         
+        // --------------------
+        // The button "Rotate".
+        // --------------------
+        
+        constraint = [NSLayoutConstraint constraintWithItem:self.rotateButton attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual
+                                                     toItem:self.view attribute:NSLayoutAttributeCenterX multiplier:1.0f
+                                                   constant:0.f];
+        [self.view addConstraint:constraint];
+        
+        constant = -kPortraitRotateCancelAndChooseButtonsVerticalMargin;
+        self.rotateButtonBottomConstraint = [NSLayoutConstraint constraintWithItem:self.rotateButton attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual
+                                                                            toItem:self.view attribute:NSLayoutAttributeBottom multiplier:1.0f
+                                                                          constant:constant];
+        [self.view addConstraint:self.rotateButtonBottomConstraint];
+        
         self.didSetupConstraints = YES;
     } else {
         if ([self isPortraitInterfaceOrientation]) {
             self.moveAndScaleLabelTopConstraint.constant = kPortraitMoveAndScaleLabelVerticalMargin;
-            self.cancelButtonBottomConstraint.constant = -kPortraitCancelAndChooseButtonsVerticalMargin;
-            self.chooseButtonBottomConstraint.constant = -kPortraitCancelAndChooseButtonsVerticalMargin;
+            self.cancelButtonBottomConstraint.constant = -kPortraitRotateCancelAndChooseButtonsVerticalMargin;
+            self.chooseButtonBottomConstraint.constant = -kPortraitRotateCancelAndChooseButtonsVerticalMargin;
+            self.rotateButtonBottomConstraint.constant = -kPortraitRotateCancelAndChooseButtonsVerticalMargin;
         } else {
             self.moveAndScaleLabelTopConstraint.constant = kLandscapeMoveAndScaleLabelVerticalMargin;
-            self.cancelButtonBottomConstraint.constant = -kLandscapeCancelAndChooseButtonsVerticalMargin;
-            self.chooseButtonBottomConstraint.constant = -kLandscapeCancelAndChooseButtonsVerticalMargin;
+            self.cancelButtonBottomConstraint.constant = -kLandscapeRotateCancelAndChooseButtonsVerticalMargin;
+            self.chooseButtonBottomConstraint.constant = -kLandscapeRotateCancelAndChooseButtonsVerticalMargin;
+            self.rotateButtonBottomConstraint.constant = -kLandscapeRotateCancelAndChooseButtonsVerticalMargin;
         }
     }
 }
@@ -346,6 +367,19 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
         _chooseButton.opaque = NO;
     }
     return _chooseButton;
+}
+
+- (UIButton *)rotateButton
+{
+    if (!_rotateButton) {
+        _rotateButton = [[UIButton alloc] init];
+        _rotateButton.translatesAutoresizingMaskIntoConstraints = NO;
+        [_rotateButton setTitle:RSKLocalizedString(@"Rotate", @"Rotate button") forState:UIControlStateNormal];
+        [_rotateButton addTarget:self action:@selector(onRotateButtonTouch:) forControlEvents:UIControlEventTouchUpInside];
+        _rotateButton.opaque = NO;
+        _rotateButton.hidden = !self.isFixedRotationEnabled;
+    }
+    return _rotateButton;
 }
 
 - (UITapGestureRecognizer *)doubleTapGestureRecognizer
@@ -496,6 +530,15 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
     }
 }
 
+- (void)setFixedRotationEnabled:(BOOL)fixedRotationEnabled
+{
+    if (_fixedRotationEnabled != fixedRotationEnabled) {
+        _fixedRotationEnabled = fixedRotationEnabled;
+        
+        self.rotateButton.hidden = !fixedRotationEnabled;
+    }
+}
+
 #pragma mark - Action handling
 
 - (void)onCancelButtonTouch:(UIBarButtonItem *)sender
@@ -506,6 +549,11 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
 - (void)onChooseButtonTouch:(UIBarButtonItem *)sender
 {
     [self cropImage];
+}
+
+- (void)onRotateButtonTouch:(UIBarButtonItem *)sender
+{
+    [self rotateNinetyDegreesClockwise];
 }
 
 - (void)handleDoubleTap:(UITapGestureRecognizer *)gestureRecognizer
@@ -537,6 +585,11 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
 }
 
 #pragma mark - Private
+
+- (void)rotateNinetyDegreesClockwise
+{
+    [self setRotationAngle:self.rotationAngle + M_PI_2];
+}
 
 - (void)reset:(BOOL)animated
 {
@@ -921,6 +974,14 @@ static const CGFloat kLayoutImageScrollViewAnimationDuration = 0.25;
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
 {
+    return YES;
+}
+
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch
+{
+    if ([touch.view isKindOfClass:[UIButton class]]) {
+        return NO;
+    }
     return YES;
 }
 

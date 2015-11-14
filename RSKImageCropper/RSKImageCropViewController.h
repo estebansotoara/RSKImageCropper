@@ -162,6 +162,13 @@ typedef NS_ENUM(NSUInteger, RSKImageCropMode) {
  */
 @property (assign, getter=isRotationEnabled, nonatomic) BOOL rotationEnabled;
 
+/**
+ A Boolean value that controls whether the rotaion by ninety degrees is enabled. Default value is `NO`.
+ 
+ @discussion To support the rotation when `cropMode` is `RSKImageCropModeCustom` you must implement the data source method `imageCropViewControllerCustomMovementRect:`.
+ */
+@property (assign, getter=isFixedRotationEnabled, nonatomic) BOOL fixedRotationEnabled;
+
 /// -------------------------------
 /// @name Accessing the UI Elements
 /// -------------------------------
@@ -180,6 +187,11 @@ typedef NS_ENUM(NSUInteger, RSKImageCropMode) {
  The Choose Button.
  */
 @property (strong, nonatomic, readonly) UIButton *chooseButton;
+
+/**
+ The Rotate Button.
+ */
+@property (strong, nonatomic, readonly) UIButton *rotateButton;
 
 /// -------------------------------------------
 /// @name Checking of the Interface Orientation
