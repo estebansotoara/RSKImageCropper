@@ -946,12 +946,12 @@ describe(@"rotation", ^{
         [mockRotationGestureRecognizer stopMocking];
     });
     
-    it(@"enables the rotation button", ^{
+    it(@"show the rotation button", ^{
         imageCropViewController = [[RSKImageCropViewController alloc] init];
         BOOL testFixedRotationEnabled = YES;
         
         id mockFixedRotationButton = [OCMockObject partialMockForObject:imageCropViewController.rotateButton];
-        [[mockFixedRotationButton expect] setEnabled:testFixedRotationEnabled];
+        [[mockFixedRotationButton expect] setHidden:!testFixedRotationEnabled];
         
         imageCropViewController.fixedRotationEnabled = testFixedRotationEnabled;
         
